@@ -24,8 +24,6 @@ const COLOR_MAP = {
   9: { color: 'green', size: 'big' }
 };
 
-const PAYOUTS = { green: 2, red: 2, violet: 4.5, big: 2, small: 2, num: 9 };
-
 // ========================
 // INIT
 // ========================
@@ -107,7 +105,9 @@ function showResult(num, color, size) {
     else if (bet.type === 'violet' && color === 'violet') { won = true; multiplier = 4.5; }
     else if (bet.type === 'big' && size === 'big') { won = true; multiplier = 2; }
     else if (bet.type === 'small' && size === 'small') { won = true; multiplier = 2; }
-    else if (bet.type === 'num' && bet.number === num) { won = true; multiplier = 9; }
+    else if (bet.type.startsWith('num') && parseInt(bet.type.replace('num','')) === num) {
+      won = true; multiplier = 9;
+    }
     if (num === 5 && (bet.type === 'green' || bet.type === 'violet')) {
       won = true;
       multiplier = bet.type === 'green' ? 2 : 4.5;
@@ -256,6 +256,7 @@ function renderTx() {
 let toastTimer;
 function showToast(msg) {
   const t = document.getElementById('toast');
+  if (!t) return;
   t.textContent = msg;
   t.classList.remove('hidden');
   clearTimeout(toastTimer);
