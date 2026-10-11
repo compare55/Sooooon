@@ -16,11 +16,6 @@ const CARD_VALUES = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 const CARD_SUITS = ['♠','♥','♦','♣'];
 const SUIT_COLORS = { '♠': '#fff', '♥': '#e94560', '♦': '#e94560', '♣': '#fff' };
 
-const PAYOUTS = {
-  dragon: 2, tiger: 2, tie: 12, suitedTie: 51,
-  dragonBig: 2, dragonSmall: 2, tigerBig: 2, tigerSmall: 2
-};
-
 // ========================
 // INIT
 // ========================
@@ -59,10 +54,8 @@ function updateTimerDisplay() {
   el.textContent = dtGame.timer;
   if (dtGame.timer <= 5) {
     el.style.color = '#e94560';
-    el.style.animation = 'pulse 0.5s infinite';
   } else {
     el.style.color = '#f7d774';
-    el.style.animation = 'none';
   }
 }
 
