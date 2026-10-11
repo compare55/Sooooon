@@ -104,6 +104,7 @@ function spin() {
   mcGame.state = 'spinning';
   document.getElementById('mcSpinBtn').disabled = true;
   mcGame.multiplier = 1;
+  mcGame.respinCount = 0;
   document.getElementById('mcMultiplierDisplay').textContent = '1x';
   document.getElementById('mcMessage').textContent = 'Spinning...';
 
