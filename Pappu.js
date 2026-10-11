@@ -12,7 +12,6 @@ const pappuGame = {
   timerInterval: null
 };
 
-// 12 Pappu Pictures
 const PAPPU_PICTURES = [
   { id: 'titli',    name: 'Titli',    icon: '🦋', color: '#e74c3c' },
   { id: 'kabutar',  name: 'Kabutar',  icon: '🕊️', color: '#3498db' },
@@ -46,7 +45,7 @@ function buildPappuGrid() {
   const grid = document.getElementById('pappuGrid');
   grid.innerHTML = PAPPU_PICTURES.map(p => `
     <div class="pappu-item" data-id="${p.id}" onclick="placeBet('${p.id}')">
-      <div class="pappu-icon" style="border-color:${p.color}">${p.icon}</div>
+      <div class="pappu-icon" style="border-color:${p.color}; color:${p.color}">${p.icon}</div>
       <div class="pappu-name">${p.name}</div>
       <div class="pappu-bet-amount" id="bet-${p.id}">0</div>
     </div>
@@ -81,7 +80,7 @@ function updateTimerDisplay() {
   if (pappuGame.timer <= 5) {
     el.style.color = '#e94560';
   } else {
-    el.style.color = '#f1c40f';
+    el.style.color = '#f7d774';
   }
 }
 
