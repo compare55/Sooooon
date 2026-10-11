@@ -1,5 +1,5 @@
 // ========================
-// AVIATOR GAME LOGIC
+// AVIATOR GAME
 // ========================
 const aviator = {
   state: 'idle',
@@ -108,7 +108,6 @@ function crash() {
   renderHistory();
 
   if (aviator.betPlaced && !aviator.cashedOut) {
-    aviator.balance -= aviator.betAmount;
     addTx('bet', aviator.betAmount, 'Aviator Lost');
     showToast(`💥 Crashed! Lost ${aviator.betAmount} coins`);
   }
@@ -131,7 +130,7 @@ function cashOut() {
 }
 
 // ========================
-// PLANE ANIMATION
+// CANVAS
 // ========================
 function updatePlanePosition(elapsed) {
   const progress = Math.min(elapsed / 10, 1);
@@ -180,7 +179,6 @@ function drawCanvas() {
 
   // Flight path
   if (aviator.flightPath.length > 1) {
-    // Glow path
     ctx.strokeStyle = 'rgba(52, 152, 219, 0.3)';
     ctx.lineWidth = 8;
     ctx.beginPath();
@@ -190,7 +188,6 @@ function drawCanvas() {
     }
     ctx.stroke();
 
-    // Main path
     const pathGrad = ctx.createLinearGradient(0, canvas.height, canvas.width, 0);
     pathGrad.addColorStop(0, '#e94560');
     pathGrad.addColorStop(1, '#f39c12');
@@ -203,7 +200,6 @@ function drawCanvas() {
     }
     ctx.stroke();
 
-    // Filled area under path
     ctx.fillStyle = 'rgba(233, 69, 96, 0.1)';
     ctx.beginPath();
     ctx.moveTo(aviator.flightPath[0].x, canvas.height);
@@ -215,9 +211,8 @@ function drawCanvas() {
     ctx.fill();
   }
 
-  // Plane with trail
+  // Plane
   if (aviator.state === 'flying' || aviator.state === 'crashed') {
-    // Plane glow
     ctx.shadowColor = aviator.state === 'crashed' ? '#e94560' : '#f1c40f';
     ctx.shadowBlur = 20;
     ctx.font = '40px serif';
@@ -226,7 +221,6 @@ function drawCanvas() {
     ctx.fillText('✈️', aviator.planeX, aviator.planeY);
     ctx.shadowBlur = 0;
 
-    // Multiplier near plane
     ctx.font = 'bold 14px "Courier New", monospace';
     ctx.fillStyle = aviator.state === 'crashed' ? '#e94560' : '#f1c40f';
     ctx.fillText(
@@ -286,7 +280,6 @@ function updateActionButton() {
   }
 }
 
-// Action button handler
 document.getElementById('aviatorActionBtn').addEventListener('click', () => {
   if (aviator.state === 'idle' || aviator.state === 'countdown') {
     placeBet();
@@ -297,14 +290,8 @@ document.getElementById('aviatorActionBtn').addEventListener('click', () => {
 
 function placeBet() {
   const bet = parseInt(document.getElementById('aviatorBet').value);
-  if (bet < 10) {
-    showToast('Minimum bet is 10 coins');
-    return;
-  }
-  if (aviator.balance < bet) {
-    showToast('Insufficient coins!');
-    return;
-  }
+  if (bet < 10) { showToast('Minimum bet is 10 coins'); return; }
+  if (aviator.balance < bet) { showToast('Insufficient coins!'); return; }
   aviator.betAmount = bet;
   aviator.betPlaced = true;
   aviator.balance -= bet;
@@ -320,7 +307,6 @@ function adjustBet(amount) {
   if (val < 10) val = 10;
   input.value = val;
 }
-
 function setBet(amount) {
   document.getElementById('aviatorBet').value = amount;
 }
@@ -330,6 +316,7 @@ function setBet(amount) {
 // ========================
 function renderHistory() {
   const bar = document.getElementById('historyBar');
+  if (!bar) return;
   bar.innerHTML = aviator.history.map(h => {
     const val = parseFloat(h);
     const color = val < 2 ? '#e94560' : val < 5 ? '#f39c12' : '#2ecc71';
@@ -394,6 +381,7 @@ function renderTx() {
 let toastTimer;
 function showToast(msg) {
   const t = document.getElementById('toast');
+  if (!t) return;
   t.textContent = msg;
   t.classList.remove('hidden');
   clearTimeout(toastTimer);
