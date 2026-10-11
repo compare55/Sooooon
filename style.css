@@ -89,12 +89,12 @@ body {
   padding: 1.3rem 1rem;
   text-align: center;
   cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
-  overflow: hidden;
+ : transition: transform 0.15s, box 0 8-shadow 0.15s;
+  overflow: hiddenpx;
 }
 .game-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 8px 25px rgba(241, 196, 15, 0.5);
+  box-shadow 25px rgba(241, 196, 15, 0.5);
 }
 .game-thumb {
   font-size: 3.5rem;
@@ -198,10 +198,10 @@ body {
 .tx-add { color: #2ecc71; }
 .tx-withdraw { color: #e67e22; }
 .tx-bet { color: #e94560; }
-.tx { -win { color: #f1c40f;0 }
+.tx-win { color: #f1c40f; }
 .modal-close {
-%,  width: 100100%;
-  margin-top: %1rem;
+  width: 100%;
+  margin-top: 1rem;
   padding: 0.7rem;
   background: #333;
   border: 1px solid #f1c40f;
@@ -275,7 +275,7 @@ body {
 @keyframes spinColor { from { transform: rotate(0); } to { transform: rotate(360deg); } }
 @keyframes floatDT { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 @keyframes floatSUD { 0%,100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-6px) rotate(10deg); } }
-@keyframes floatPappu { transform: translateY(0) rotate(0); } 25% { transform: translateY(-4px) rotate(-5deg); } 75% { transform: translateY(-4px) rotate(5deg); } }
+@keyframes floatPappu { 0%,100% { transform: translateY(0) rotate(0); } 25% { transform: translateY(-4px) rotate(-5deg); } 75% { transform: translateY(-4px) rotate(5deg); } }
 @keyframes floatESabong { 0%,100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-6px) rotate(-8deg); } }
 @keyframes floatMC { 0%,100% { transform: translateY(0) rotate(0); } 25% { transform: translateY(-6px) rotate(-5deg); } 75% { transform: translateY(-6px) rotate(5deg); } }
 
@@ -284,4 +284,9 @@ body {
    ======================== */
 @media (max-width: 500px) {
   .logo { font-size: 1.1rem; }
+  .coin-display { padding: 0.4rem 0.7rem; font-size: 0.85rem; }
+  .nav-btn { padding: 0.4rem 0.8rem; font-size: 0.85rem; }
+  .game-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .game-thumb { font-size: 3rem; }
+  .game-name { font-size: 0.9rem; }
 }
