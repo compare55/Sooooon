@@ -1,130 +1,289 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>7Up 7Down</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="seven-up-down-luxury.css">
-</head>
-<body>
+// ========================
+// 7UP 7DOWN GAME
+// ========================
+const sudGame = {
+  state: 'betting',
+  timer: 10,
+  balance: parseInt(localStorage.getItem('demoBalance')) || 1000,
+  transactions: JSON.parse(localStorage.getItem('demoTx')) || [],
+  history: JSON.parse(localStorage.getItem('sudHistory')) || [],
+  bets: {},
+  chipValue: 50,
+  timerInterval: null
+};
 
-  <header class="navbar">
-    <button class="back-icon" onclick="location.href='index.html'">←</button>
-    <div class="logo">🎲 7Up 7Down</div>
-    <div class="nav-wallet">
-      <div class="coin-display">🪙 <span id="navBalance">1000</span></div>
-      <button class="nav-btn" onclick="openWallet()">Wallet</button>
-    </div>
-  </header>
+const DICE_FACES = ['⚀','⚁','⚂','⚃','⚄','⚅'];
 
-  <main class="page">
-    <div class="sud-container">
-      <div class="sud-header">
-        <div class="sud-status" id="sudStatus">Place your bets!</div>
-        <div class="sud-timer" id="sudTimer">10</div>
-      </div>
+// ========================
+// INIT
+// ========================
+document.addEventListener('DOMContentLoaded', () => {
+  updateAllBalances();
+  renderHistory();
+  renderBets();
+  startBettingRound();
+  selectChip(50);
+});
 
-      <div class="sud-dice-area">
-        <div class="sud-dice" id="dice1">⚀</div>
-        <div class="sud-dice" id="dice2">⚀</div>
-        <div class="sud-sum" id="sudSum">?</div>
-      </div>
+function startBettingRound() {
+  sudGame.state = 'betting';
+  sudGame.timer = 10;
+  sudGame.bets = {};
+  renderBets();
+  updateTotalBet();
+  updateStatus('Place your bets!');
+  updateTimerDisplay();
+  resetDice();
 
-      <div class="sud-main-bets">
-        <button class="sud-bet-btn down" onclick="placeBet('down')">
-          <span class="sud-bet-icon">⬇️</span>
-          <span class="sud-bet-name">7 DOWN</span>
-          <span class="sud-bet-range">2-6</span>
-          <span class="sud-bet-payout">2x</span>
-          <span class="sud-bet-amount" id="betDown">0</span>
-        </button>
-        <button class="sud-bet-btn lucky" onclick="placeBet('lucky')">
-          <span class="sud-bet-icon">🎯</span>
-          <span class="sud-bet-name">LUCKY 7</span>
-          <span class="sud-bet-range">= 7</span>
-          <span class="sud-bet-payout">5x</span>
-          <span class="sud-bet-amount" id="betLucky">0</span>
-        </button>
-        <button class="sud-bet-btn up" onclick="placeBet('up')">
-          <span class="sud-bet-icon">⬆️</span>
-          <span class="sud-bet-name">7 UP</span>
-          <span class="sud-bet-range">8-12</span>
-          <span class="sud-bet-payout">2x</span>
-          <span class="sud-bet-amount" id="betUp">0</span>
-        </button>
-      </div>
+  if (sudGame.timerInterval) clearInterval(sudGame.timerInterval);
+  sudGame.timerInterval = setInterval(() => {
+    sudGame.timer--;
+    updateTimerDisplay();
+    if (sudGame.timer <= 3) updateStatus('Betting closing soon!');
+    if (sudGame.timer <= 0) {
+      clearInterval(sudGame.timerInterval);
+      rollDice();
+    }
+  }, 1000);
+}
 
-      <div class="sud-side-bets">
-        <button class="sud-side-btn odd" onclick="placeBet('odd')">
-          🔢 ODD <span class="payout-tag">2x</span>
-          <span class="sud-side-amount" id="betOdd">0</span>
-        </button>
-        <button class="sud-side-btn even" onclick="placeBet('even')">
-          🔢 EVEN <span class="payout-tag">2x</span>
-          <span class="sud-side-amount" id="betEven">0</span>
-        </button>
-      </div>
+function updateTimerDisplay() {
+  const el = document.getElementById('sudTimer');
+  el.textContent = sudGame.timer;
+  if (sudGame.timer <= 3) {
+    el.style.color = '#e94560';
+  } else {
+    el.style.color = '#f7d774';
+  }
+}
 
-      <div class="sud-number-section">
-        <div class="sud-number-label">Bet on Exact Number (9x)</div>
-        <div class="sud-number-grid">
-          <button class="sud-num-btn" onclick="placeBet('num2')">2</button>
-          <button class="sud-num-btn" onclick="placeBet('num3')">3</button>
-          <button class="sud-num-btn" onclick="placeBet('num4')">4</button>
-          <button class="sud-num-btn" onclick="placeBet('num5')">5</button>
-          <button class="sud-num-btn" onclick="placeBet('num6')">6</button>
-          <button class="sud-num-btn" onclick="placeBet('num7')">7</button>
-          <button class="sud-num-btn" onclick="placeBet('num8')">8</button>
-          <button class="sud-num-btn" onclick="placeBet('num9')">9</button>
-          <button class="sud-num-btn" onclick="placeBet('num10')">10</button>
-          <button class="sud-num-btn" onclick="placeBet('num11')">11</button>
-          <button class="sud-num-btn" onclick="placeBet('num12')">12</button>
-        </div>
-      </div>
+function updateStatus(msg) {
+  document.getElementById('sudStatus').textContent = msg;
+}
 
-      <div class="sud-bet-section">
-        <div class="dt-bet-label">Select Chip</div>
-        <div class="dt-chips">
-          <button class="chip" data-val="10" onclick="selectChip(10)">10</button>
-          <button class="chip active" data-val="50" onclick="selectChip(50)">50</button>
-          <button class="chip" data-val="100" onclick="selectChip(100)">100</button>
-          <button class="chip" data-val="500" onclick="selectChip(500)">500</button>
-        </div>
-      </div>
+// ========================
+// CHIP SELECTION
+// ========================
+function selectChip(val) {
+  sudGame.chipValue = val;
+  document.querySelectorAll('.chip').forEach(c => {
+    c.classList.toggle('active', parseInt(c.dataset.val) === val);
+  });
+}
 
-      <div class="sud-footer">
-        <div class="sud-total">Total Bet: <span id="sudTotalBet">0</span> 🪙</div>
-        <button class="sud-clear-btn" onclick="clearBets()">Clear All</button>
-      </div>
+// ========================
+// PLACE BET
+// ========================
+function placeBet(type) {
+  if (sudGame.state !== 'betting') {
+    showToast('Betting is closed!');
+    return;
+  }
+  const chip = sudGame.chipValue;
+  if (sudGame.balance < chip) {
+    showToast('Insufficient coins!');
+    return;
+  }
+  sudGame.balance -= chip;
+  sudGame.bets[type] = (sudGame.bets[type] || 0) + chip;
+  updateAllBalances();
+  renderBets();
+  updateTotalBet();
+  addTx('bet', chip, `7U7D: ${type}`);
+}
 
-      <div class="sud-history">
-        <h3>Last 10 Results</h3>
-        <div class="sud-history-list" id="sudHistory"></div>
-      </div>
-    </div>
-  </main>
+function renderBets() {
+  const map = {
+    down: 'betDown', up: 'betUp', lucky: 'betLucky',
+    odd: 'betOdd', even: 'betEven'
+  };
+  Object.keys(map).forEach(k => {
+    const el = document.getElementById(map[k]);
+    if (el) el.textContent = sudGame.bets[k] || 0;
+  });
+}
 
-  <div id="walletModal" class="modal hidden">
-    <div class="modal-content">
-      <h2>💰 My Wallet</h2>
-      <div class="wallet-balance">
-        <div class="wb-label">Available Coins</div>
-        <div class="wb-amount">🪙 <span id="walletBalance">1000</span></div>
-      </div>
-      <div class="wallet-actions">
-        <button class="btn-add" onclick="addCoins()">+ Add Coins</button>
-        <button class="btn-withdraw" onclick="withdrawCoins()">↓ Withdraw</button>
-      </div>
-      <div class="wallet-info"><p>⚠️ Virtual coins only. No real money involved.</p></div>
-      <h3 style="margin-top:1.5rem;">Transaction History</h3>
-      <div id="txHistory" class="tx-history"></div>
-      <button class="modal-close" onclick="closeWallet()">Close</button>
-    </div>
-  </div>
+function updateTotalBet() {
+  const total = Object.values(sudGame.bets).reduce((a, b) => a + b, 0);
+  document.getElementById('sudTotalBet').textContent = total;
+}
 
-  <div id="toast" class="toast hidden"></div>
+function clearBets() {
+  if (sudGame.state !== 'betting') return;
+  const total = Object.values(sudGame.bets).reduce((a, b) => a + b, 0);
+  if (total > 0) {
+    sudGame.balance += total;
+    updateAllBalances();
+    showToast(`${total} coins returned`);
+  }
+  sudGame.bets = {};
+  renderBets();
+  updateTotalBet();
+}
 
-  <script src="seven-up-down.js"></script>
-</body>
-</html>
+// ========================
+// ROLL DICE
+// ========================
+function rollDice() {
+  sudGame.state = 'rolling';
+  updateStatus('Rolling...');
+
+  const d1 = Math.floor(Math.random() * 6) + 1;
+  const d2 = Math.floor(Math.random() * 6) + 1;
+  const sum = d1 + d2;
+
+  let flicker = 0;
+  const flickerInt = setInterval(() => {
+    document.getElementById('dice1').textContent = DICE_FACES[Math.floor(Math.random()*6)];
+    document.getElementById('dice2').textContent = DICE_FACES[Math.floor(Math.random()*6)];
+    document.getElementById('sudSum').textContent = Math.floor(Math.random()*11)+2;
+    flicker++;
+    if (flicker > 12) {
+      clearInterval(flickerInt);
+      showResult(d1, d2, sum);
+    }
+  }, 80);
+}
+
+function showResult(d1, d2, sum) {
+  sudGame.state = 'result';
+
+  document.getElementById('dice1').textContent = DICE_FACES[d1 - 1];
+  document.getElementById('dice2').textContent = DICE_FACES[d2 - 1];
+  document.getElementById('sudSum').textContent = sum;
+
+  const isOdd = sum % 2 !== 0;
+
+  let totalWin = 0;
+  let details = [];
+
+  Object.keys(sudGame.bets).forEach(type => {
+    const amt = sudGame.bets[type];
+    let won = false;
+    let mult = 0;
+
+    if (type === 'down' && sum < 7) { won = true; mult = 2; }
+    else if (type === 'up' && sum > 7) { won = true; mult = 2; }
+    else if (type === 'lucky' && sum === 7) { won = true; mult = 5; }
+    else if (type === 'odd' && isOdd) { won = true; mult = 2; }
+    else if (type === 'even' && !isOdd) { won = true; mult = 2; }
+    else if (type.startsWith('num') && parseInt(type.replace('num','')) === sum) {
+      won = true; mult = 9;
+    }
+
+    if (won) {
+      const winAmt = Math.floor(amt * mult);
+      totalWin += winAmt;
+      details.push(`${type} +${winAmt}`);
+      addTx('win', winAmt, `7U7D: ${type}`);
+    }
+  });
+
+  if (totalWin > 0) {
+    sudGame.balance += totalWin;
+    updateAllBalances();
+    updateStatus(`You won ${totalWin} coins! 🎉`);
+    showToast(`+${totalWin} coins! ${details.join(', ')}`);
+  } else {
+    updateStatus(`Result: ${sum} — Better luck next time!`);
+  }
+
+  sudGame.history.unshift({ d1, d2, sum, isOdd });
+  sudGame.history = sudGame.history.slice(0, 10);
+  localStorage.setItem('sudHistory', JSON.stringify(sudGame.history));
+  renderHistory();
+
+  setTimeout(() => {
+    startBettingRound();
+  }, 3000);
+}
+
+function resetDice() {
+  document.getElementById('dice1').textContent = '⚀';
+  document.getElementById('dice2').textContent = '⚀';
+  document.getElementById('sudSum').textContent = '?';
+}
+
+// ========================
+// HISTORY
+// ========================
+function renderHistory() {
+  const list = document.getElementById('sudHistory');
+  if (!list) return;
+  if (sudGame.history.length === 0) {
+    list.innerHTML = '<div style="color:#666;text-align:center;padding:1rem;">No results yet</div>';
+    return;
+  }
+  list.innerHTML = sudGame.history.map(h => {
+    const cls = h.sum < 7 ? 'green' : h.sum > 7 ? 'red' : 'violet';
+    const label = h.sum < 7 ? 'DOWN' : h.sum > 7 ? 'UP' : 'LUCKY 7';
+    return `<div class="sud-history-item">
+      <span>🎲 ${h.d1} + ${h.d2}</span>
+      <span class="sud-h-sum ${cls}">${h.sum} (${label})</span>
+    </div>`;
+  }).join('');
+}
+
+// ========================
+// WALLET
+// ========================
+function updateAllBalances() {
+  const navBal = document.getElementById('navBalance');
+  if (navBal) navBal.textContent = sudGame.balance;
+  const walletBal = document.getElementById('walletBalance');
+  if (walletBal) walletBal.textContent = sudGame.balance;
+  localStorage.setItem('demoBalance', sudGame.balance);
+}
+
+function addTx(type, amount, note = '') {
+  sudGame.transactions.unshift({ type, amount, note, time: new Date().toLocaleTimeString() });
+  sudGame.transactions = sudGame.transactions.slice(0, 30);
+  localStorage.setItem('demoTx', JSON.stringify(sudGame.transactions));
+  renderTx();
+}
+
+function renderTx() {
+  const box = document.getElementById('txHistory');
+  if (!box) return;
+  if (sudGame.transactions.length === 0) {
+    box.innerHTML = '<div style="padding:0.5rem;color:#666;text-align:center;">No transactions yet</div>';
+    return;
+  }
+  box.innerHTML = sudGame.transactions.map(tx => {
+    const sign = (tx.type === 'add' || tx.type === 'win') ? '+' : '-';
+    return `<div class="tx-item"><span>${tx.note || tx.type}</span><span class="tx-${tx.type}">${sign}${tx.amount}</span></div>`;
+  }).join('');
+}
+
+function openWallet() {
+  document.getElementById('walletModal').classList.remove('hidden');
+  updateAllBalances();
+  renderTx();
+}
+function closeWallet() {
+  document.getElementById('walletModal').classList.add('hidden');
+}
+function addCoins() {
+  sudGame.balance += 1000;
+  updateAllBalances();
+  addTx('add', 1000, 'Coins Added');
+  showToast('+1000 Coins added! 🪙');
+}
+function withdrawCoins() {
+  if (sudGame.balance <= 0) { showToast('No coins to withdraw!'); return; }
+  const amount = Math.min(sudGame.balance, 500);
+  sudGame.balance -= amount;
+  updateAllBalances();
+  addTx('withdraw', amount, 'Withdrawn to Vault');
+  showToast(`${amount} coins moved to Vault 🔒`);
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.add('hidden'), 2500);
+}
