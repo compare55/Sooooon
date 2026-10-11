@@ -69,8 +69,8 @@ function updateTimerDisplay() {
     el.style.color = '#e94560';
     fill.style.background = 'linear-gradient(90deg, #e94560, #c0392b)';
   } else {
-    el.style.color = '#f1c40f';
-    fill.style.background = 'linear-gradient(90deg, #f1c40f, #f39c12)';
+    el.style.color = '#f7d774';
+    fill.style.background = 'linear-gradient(90deg, #f7d774, #f39c12)';
   }
 }
 
