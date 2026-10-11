@@ -1,3 +1,6 @@
+// ========================
+// SLOT GAME
+// ========================
 const SYMBOLS = [
   { id: 'cherry',  emoji: '🍒', weight: 22, pay: { 3: 3, 4: 8, 5: 20 } },
   { id: 'lemon',   emoji: '🍋', weight: 20, pay: { 3: 4, 4: 10, 5: 25 } },
@@ -26,9 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
   spinBtn.addEventListener('click', spin);
 });
 
-/* ======================
-   SETUP
-   ====================== */
+// ========================
+// SETUP
+// ========================
 function setupBetChips() {
   document.querySelectorAll('.bet-chip').forEach(chip => {
     chip.addEventListener('click', () => {
@@ -42,6 +45,7 @@ function setupBetChips() {
 
 function animateJackpot() {
   const el = document.getElementById('jackpotValue');
+  if (!el) return;
   let value = 12450000;
   setInterval(() => {
     value += Math.floor(Math.random() * 500) + 100;
@@ -49,16 +53,15 @@ function animateJackpot() {
   }, 3000);
 }
 
-/* ======================
-   SYMBOL LOGIC
-   ====================== */
+// ========================
+// SYMBOL LOGIC
+// ========================
 function getRandomSymbol() {
   const total = SYMBOLS.reduce((s, x) => s + x.weight, 0);
   let r = Math.random() * total;
-  for (const sym of */
- SYMBOLS) {
-    r -= sym.weightfunction;
- update    if (r <= 0All)Bal return sym;
+  for (const sym of SYMBOLS) {
+    r -= sym.weight;
+    if (r <= 0) return sym;
   }
   return SYMBOLS[0];
 }
@@ -75,9 +78,9 @@ function randomizeReels() {
   });
 }
 
-/* ======================
-   SPIN
-   ====================== */
+// ========================
+// SPIN
+// ========================
 function spin() {
   if (spinning) return;
   if (balance < currentBet) {
@@ -134,9 +137,9 @@ function spin() {
   });
 }
 
-/* ======================
-   EVALUATE
-   ====================== */
+// ========================
+// EVALUATE
+// ========================
 function evaluateWins(results) {
   const grid = [[], [], []];
   for (let row = 0; row < 3; row++) {
@@ -202,9 +205,9 @@ function clearWinHighlights() {
   document.querySelectorAll('.sym').forEach(s => s.classList.remove('win-cell'));
 }
 
-/* ======================
-   EFFECTS
-   ====================== */
+// ========================
+// EFFECTS
+// ========================
 function spawnCoins(count) {
   for (let i = 0; i < count; i++) {
     setTimeout(() => {
@@ -234,9 +237,10 @@ function hideBigWin() {
   bigWinBanner.classList.remove('show');
 }
 
-/* ======================
-   WALLET
-   ======================ances() {
+// ========================
+// WALLET
+// ========================
+function updateAllBalances() {
   const navBal = document.getElementById('navBalance');
   if (navBal) navBal.textContent = balance;
   const slotBal = document.getElementById('slotBalance');
@@ -285,6 +289,7 @@ function withdrawCoins() {
 let toastTimer;
 function showToast(msg) {
   const t = document.getElementById('toast');
+  if (!t) return;
   t.textContent = msg;
   t.classList.remove('hidden');
   clearTimeout(toastTimer);
